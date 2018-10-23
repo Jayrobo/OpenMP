@@ -64,7 +64,6 @@ void outputter(vector<key_val> collection);
 vector<key_val> inputter(string filename)
 {
 	int word_count = 0;
-
 	ifstream input_file;
 	input_file.open(filename);
 
@@ -75,7 +74,7 @@ vector<key_val> inputter(string filename)
 		input_file >> temp;
 
 
-		for (int i = 0; i < temp.size(); ++i)
+		for (size_t i = 0; i < temp.size(); ++i)
 		{
 			temp[i] = tolower(temp[i]); //convert everything into lower cases
 
@@ -139,7 +138,7 @@ void outputter(vector<key_val> collection)
 		return lhs.value > rhs.value;
 	});
 
-	for (int i = 0; i < collection.size(); i++)
+	for (size_t i = 0; i < collection.size(); i++)
 	{
 		cout << left << setw(30) << collection[i].key << "  " << collection[i].value << endl;
 	}

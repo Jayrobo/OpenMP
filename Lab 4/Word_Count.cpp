@@ -6,7 +6,7 @@
 #include <set>
 #include "FourPieces.h"
 #include <vector>
-//#include <thread>
+#include <thread>
 #include <mutex>
 //#include <condition_variable>
 #include <omp.h>
@@ -24,7 +24,7 @@ struct comp
 	{
 		if (left.second != right.second)
 			return left.second > right.second;
-	
+
 		return left.first > right.first;
 	}
 };
@@ -37,25 +37,25 @@ void First_Word_Count()
 
 	/*do
 	{
-		cin >> filename;
-		input_file.open(filename);
+	cin >> filename;
+	input_file.open(filename);
 
-		if (input_file.fail())
-			cout << "Error, please input with correct file name: ";
+	if (input_file.fail())
+	cout << "Error, please input with correct file name: ";
 	} while (input_file.fail());
 	*/
 
 	input_file.open("Text.txt");
 
 	int word_count = 0;
-	
+
 	while (!input_file.eof())
 	{
 		//getline(input_file, content);
-		string temp; 
+		string temp;
 		input_file >> temp;
 
-		for (int i = 0; i < temp.size(); ++i)
+		for (size_t i = 0; i < temp.size(); ++i)
 		{
 			temp[i] = tolower(temp[i]); //convert everything into lower cases
 
@@ -78,13 +78,13 @@ void First_Word_Count()
 		{
 			temp = temp.substr(0, found); //to make sure the word doesn't include other symbols 
 		}
-		
+
 		if (temp != "\0" && temp != "-") //remove stand along character
 		{
-				content.insert(pair<string, int>(temp, 1));
-				word_count++;
+			content.insert(pair<string, int>(temp, 1));
+			word_count++;
 		}
-			
+
 		//cout << temp << endl;
 		//content.push_back(temp.substr());
 	}
@@ -92,8 +92,7 @@ void First_Word_Count()
 	std::map<string, int> reduced_content;
 	string current_content = "a";
 	int similar_count = 1; //since its registered in map, it means the least count it will have is 1
-	std::map<string, int>::iterator it = content.begin();
-	for (it; it != content.end(); it++)
+	for (std::map<string, int>::iterator it = content.begin(); it != content.end(); it++)
 	{
 		if (it->first != current_content)
 		{
@@ -105,29 +104,23 @@ void First_Word_Count()
 			current_content = it->first; //update for the next comparison
 			similar_count = 1; //reset the count because a new key has arrived
 
-			//cout << current_content << endl;
+							   //cout << current_content << endl;
 		}
 		else if (it->first == current_content)
 		{
 			similar_count++; //adding one for similar count
-			//cout << current_content << endl;
+							 //cout << current_content << endl;
 		}
-			
+
 	}
 	//since "your" was the last key that did not get processed
 	reduced_content.insert(pair<string, int>(current_content, similar_count));
-	
+
 	set<pair<string, int>, comp> set(reduced_content.begin(), reduced_content.end());
-	
-	//for (map<string,int>::iterator it = content.begin(); it != content.end(); it++)
-	//	cout << left << setw(30) << it->first << it->second << endl;
-	//for (map<string,int>::iterator it = reduced_content.begin(); it != reduced_content.end(); it++)
-	//	cout << left << setw(30) << it->first << it->second << endl;
-	int i = 0;
 
 	for (auto const &pair : set) //tried to manually produce the auto type but idk how
 		cout << left << setw(30) << pair.first << pair.second << endl; //<< "  " <<i++ <<endl;
-	//cout << content << " " << word_count <<endl;
+																	   //cout << content << " " << word_count <<endl;
 
 
 	input_file.close();
@@ -147,11 +140,11 @@ void Second_Word_Count(vector<key_val> content)
 {
 	int ID = omp_get_thread_num();
 	cout << ID << endl;
-	for (int i = 0; i < content.size(); i++)
+	for (size_t i = 0; i < content.size(); i++)
 		content[i] = mapper(content[i].key);
 
-	int pos = 0;
-	
+	size_t pos = 0;
+
 	while (pos < content.size())
 	{
 		//cout << "now doing a thread" << endl;
@@ -178,7 +171,7 @@ void Second_Word_Count(vector<key_val> content)
 			//cout << "Second word starts from now" << endl;
 			for (int i = 0; i < all_content_size; i++)
 			{
-				if((i == all_content_size-1) && (all_content[i].key != content[pos].key))
+				if ((i == all_content_size - 1) && (all_content[i].key != content[pos].key))
 				{
 					//unique_lock<mutex> Locked(locker);
 					//cout << "Is the lock dead???" << endl;
@@ -194,7 +187,7 @@ void Second_Word_Count(vector<key_val> content)
 					break;
 				}
 				else if (all_content[i].key == content[pos].key) //if there is the same key then you can break from the loop
-				{	
+				{
 					//unique_lock<mutex> Locked(locker);
 					//cv.wait(Locked);
 					//Locked.lock();
@@ -202,11 +195,11 @@ void Second_Word_Count(vector<key_val> content)
 					//Locked.unlock();
 					//cv.notify_one();
 					//cout << "Found the same key, add them up" << endl;
-					break; 
+					break;
 				}
 				//ready = false;
 			}
-			
+
 		}
 
 		pos++; //accessing the next vector content of the thread
@@ -220,7 +213,7 @@ int main()
 	string method1_2;
 	cout << "Please Enter 1 or 2 or 3: ";
 	cin >> method1_2;
-	
+
 	if (method1_2 == "1")
 	{
 		//cout << "Please input the input file name:";
@@ -230,17 +223,17 @@ int main()
 	else if (method1_2 == "2")
 	{
 		vector<key_val> content;
-		content = inputter("text.txt");
+		content = inputter("Text.txt");
 
 		//map the content
-		for (int i = 0; i < content.size(); i++)
+		for (size_t i = 0; i < content.size(); i++)
 		{
 			content[i] = mapper(content[i].key);
 		}
 
 		vector<key_val> content_odd, content_even;
 		int num = 0;
-		for (int i = 0; i <= content.size(); i = i + 2)
+		for (size_t i = 0; i <= content.size(); i = i + 2)
 		{
 
 			if (i + 1 >= content.size())
@@ -276,10 +269,10 @@ int main()
 	else if (method1_2 == "3")
 	{
 		vector<key_val> content;
-		content = inputter("text.txt");
+		content = inputter("Text.txt");
 
 		//map the content
-		for (int i = 0; i < content.size(); i++)
+		for (size_t i = 0; i < content.size(); i++)
 		{
 			content[i] = mapper(content[i].key);
 		}
@@ -288,7 +281,7 @@ int main()
 		int num = 0;
 		mutex locking;
 		omp_set_num_threads(2);
-		#pragma omp parallel for
+#pragma omp parallel for
 		for (int i = 0; i <= content.size(); i = i + 2)
 		{
 
@@ -320,12 +313,12 @@ int main()
 		}
 
 
-		#pragma omp parallel for
+#pragma omp parallel for
 		for (int i = 0; i < 2; i++)
 		{
 			if (i == 1)
 				Second_Word_Count(content_odd);
-			else 
+			else
 				Second_Word_Count(content_even);
 		}
 
@@ -343,17 +336,16 @@ int main()
 	/*mutex locking;
 	#pragma omp parallel for
 	//{
-		for (int i = 0; i < 5; i++)
-		{
-			int ID = omp_get_thread_num();
-			//#pragma ordered
-			locking.lock();
-			cout << "testing - ID: " << ID << endl;
-			locking.unlock();
-		}
+	for (int i = 0; i < 5; i++)
+	{
+	int ID = omp_get_thread_num();
+	//#pragma ordered
+	locking.lock();
+	cout << "testing - ID: " << ID << endl;
+	locking.unlock();
+	}
 	//}
 	*/
-
 	system("pause");
 	return 0;
 }
