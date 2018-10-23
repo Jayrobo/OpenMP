@@ -6,9 +6,10 @@
 #include <set>
 #include "FourPieces.h"
 #include <vector>
-#include <thread>
+//#include <thread>
 #include <mutex>
 //#include <condition_variable>
+#include <omp.h>
 
 
 using namespace std;
@@ -141,6 +142,8 @@ int all_content_size = 0;
 bool ready = false;
 void Second_Word_Count(vector<key_val> content)
 {
+	int ID = omp_get_thread_num();
+	cout << ID << endl;
 	for (int i = 0; i < content.size(); i++)
 		content[i] = mapper(content[i].key);
 
@@ -232,8 +235,16 @@ int main()
 			content[i] = mapper(content[i].key);
 		}
 
+	    #pragma omp parallel num_threads(4)
+		{
+			Second_Word_Count(content);
+		}
 
-		vector<key_val> content_odd, content_even;
+
+		outputter(all_content);
+
+
+		/*vector<key_val> content_odd, content_even;
 		int num = 0;
 		for (int i = 0; i <= content.size(); i = i + 2)
 		{
@@ -259,7 +270,7 @@ int main()
 			}
 
 			num++;
-		}
+		}*/
 
 		//check if even and odd are partition properly
 		/*for (int i = 0; i < content_odd.size(); i++)
@@ -268,13 +279,10 @@ int main()
 		}
 		cout << content_even[content_even.size()-1].key << endl;*/
 
-		thread index_odd(Second_Word_Count, content_odd);
+		/*thread index_odd(Second_Word_Count, content_odd);
 		thread index_even(Second_Word_Count, content_even);
-
-
 		index_odd.join();
-		index_even.join();
-		outputter(all_content);
+		index_even.join();*/
 	}
 	else
 	{
@@ -285,6 +293,12 @@ int main()
 	//string can be directly compared
 	//if (content[5].key == content[7].key)
 	//	cout << "IT WORKS with the all_content size: " << all_content.size() << "  " << all_content_size << endl;
+	omp_set_num_threads(4);
+	#pragma omp parallel
+	{
+		int ID = omp_get_thread_num();
+		cout << "testing - ID: " << ID << endl;
+	}
 
 	system("pause");
 	return 0;
