@@ -35,7 +35,7 @@ void First_Word_Count()
 	string filename;
 	multimap <string, int> content;
 
-	do
+	/*do
 	{
 		cin >> filename;
 		input_file.open(filename);
@@ -43,6 +43,9 @@ void First_Word_Count()
 		if (input_file.fail())
 			cout << "Error, please input with correct file name: ";
 	} while (input_file.fail());
+	*/
+
+	input_file.open("Text.txt");
 
 	int word_count = 0;
 	
@@ -215,12 +218,12 @@ void Second_Word_Count(vector<key_val> content)
 int main()
 {
 	string method1_2;
-	cout << "Please Enter 1 or 2" << endl;
+	cout << "Please Enter 1 or 2 or 3: ";
 	cin >> method1_2;
 	
 	if (method1_2 == "1")
 	{
-		cout << "Please input the input file name:";
+		//cout << "Please input the input file name:";
 		First_Word_Count();
 	}
 	//cout << "done";
@@ -235,16 +238,7 @@ int main()
 			content[i] = mapper(content[i].key);
 		}
 
-	    #pragma omp parallel num_threads(4)
-		{
-			Second_Word_Count(content);
-		}
-
-
-		outputter(all_content);
-
-
-		/*vector<key_val> content_odd, content_even;
+		vector<key_val> content_odd, content_even;
 		int num = 0;
 		for (int i = 0; i <= content.size(); i = i + 2)
 		{
@@ -270,19 +264,72 @@ int main()
 			}
 
 			num++;
-		}*/
-
-		//check if even and odd are partition properly
-		/*for (int i = 0; i < content_odd.size(); i++)
-		{
-			cout << left << setw(30) << content_odd[i].key << "   " << content_even[i].key << endl;
 		}
-		cout << content_even[content_even.size()-1].key << endl;*/
 
-		/*thread index_odd(Second_Word_Count, content_odd);
+		thread index_odd(Second_Word_Count, content_odd);
 		thread index_even(Second_Word_Count, content_even);
 		index_odd.join();
-		index_even.join();*/
+		index_even.join();
+
+		outputter(all_content);
+	}
+	else if (method1_2 == "3")
+	{
+		vector<key_val> content;
+		content = inputter("text.txt");
+
+		//map the content
+		for (int i = 0; i < content.size(); i++)
+		{
+			content[i] = mapper(content[i].key);
+		}
+
+		vector<key_val> content_odd, content_even;
+		int num = 0;
+		mutex locking;
+		omp_set_num_threads(2);
+		#pragma omp parallel for
+		for (int i = 0; i <= content.size(); i = i + 2)
+		{
+
+			if (i + 1 >= content.size())
+			{
+				//do nothing, avoid out of memory access
+			}
+			else
+			{
+				locking.lock();
+				content_odd.push_back(key_val());
+				content_odd[num] = content[i + 1];
+				locking.unlock();
+			}
+
+			if (i >= content.size())
+			{
+				//do nothing, avoid out of memory access
+			}
+			else
+			{
+				locking.lock();
+				content_even.push_back(key_val());
+				content_even[num] = content[i];
+				locking.unlock();
+			}
+
+			num++;
+		}
+
+
+		#pragma omp parallel for
+		for (int i = 0; i < 2; i++)
+		{
+			if (i == 1)
+				Second_Word_Count(content_odd);
+			else 
+				Second_Word_Count(content_even);
+		}
+
+		outputter(all_content);
 	}
 	else
 	{
@@ -293,12 +340,19 @@ int main()
 	//string can be directly compared
 	//if (content[5].key == content[7].key)
 	//	cout << "IT WORKS with the all_content size: " << all_content.size() << "  " << all_content_size << endl;
-	omp_set_num_threads(4);
-	#pragma omp parallel
-	{
-		int ID = omp_get_thread_num();
-		cout << "testing - ID: " << ID << endl;
-	}
+	/*mutex locking;
+	#pragma omp parallel for
+	//{
+		for (int i = 0; i < 5; i++)
+		{
+			int ID = omp_get_thread_num();
+			//#pragma ordered
+			locking.lock();
+			cout << "testing - ID: " << ID << endl;
+			locking.unlock();
+		}
+	//}
+	*/
 
 	system("pause");
 	return 0;
